@@ -3,9 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <title>Панель статистики</title>
-    <script src="https://jsdelivr.net"></script>
     <!-- Библиотека графиков Chart.js -->
-    <script src="https://jsdelivr.net"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body class="bg-gray-100 font-sans">
 <nav class="bg-white shadow mb-8">
@@ -38,62 +37,59 @@
         </div>
     </div>
 </div>
-
 <script>
-    // Данные из Laravel Laravel Blade-директив
-    const hourlyRaw = {!! json_encode($hourlyData) !!};
-    const cityRaw = {!! json_encode($cityData) !!};
+    // Ждем полной загрузки DOM-дерева и всех внешних скриптов (Chart.js)
+    document.addEventListener("DOMContentLoaded", function () {
 
-    // 1. Настройка горизонтального графика по часам
-    // По ТЗ: ось X — количество уникальных посещений, ось Y — время
-    const hourlyCanvas = document.getElementById('hourlyChart');
-    new Chart(hourlyCanvas, {
-        type: 'bar',
-        data: {
-            labels: hourlyRaw.map(item => item.hour), // Время пойдет на ось Y
-            datasets: [{
-                label: 'Уникальные посещения',
-                data: hourlyRaw.map(item => item.unique_visits), // Количество пойдет на ось X
-                backgroundColor: 'rgba(59, 130, 246, 0.7)',
-                borderColor: 'rgb(59, 130, 246)',
-                borderWidth: 1
-            }]
-        },
-        options: {
-            indexAxis: 'y', // ВАЖНО: Делает график горизонтальным (X - количество, Y - время)
-            responsive: true,
-            maintainAspectRatio: false
+        // Данные из Laravel Blade-директив
+        const hourlyRaw = {!! json_encode($hourlyData) !!};
+        const cityRaw = {!! json_encode($cityData) !!};
+
+        // 1. Настройка горизонтального графика по часам
+        const hourlyCanvas = document.getElementById('hourlyChart');
+        if (hourlyCanvas) {
+            new Chart(hourlyCanvas, {
+                type: 'bar',
+                data: {
+                    labels: hourlyRaw.map(item => item.hour),
+                    datasets: [{
+                        label: 'Уникальные посещения',
+                        data: hourlyRaw.map(item => item.unique_visits),
+                        backgroundColor: 'rgba(59, 130, 246, 0.7)',
+                        borderColor: 'rgb(59, 130, 246)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    indexAxis: 'y', // Наше строгое условие ТЗ: X - количество, Y - время
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+        }
+
+        // 2. Настройка круговой диаграммы по городам
+        const cityCanvas = document.getElementById('cityChart');
+        if (cityCanvas) {
+            new Chart(cityCanvas, {
+                type: 'pie',
+                data: {
+                    labels: cityRaw.map(item => item.city),
+                    datasets: [{
+                        data: cityRaw.map(item => item.total),
+                        backgroundColor: [
+                            '#ef4444', '#f97316', '#f59e0b', '#10b981',
+                            '#06b6d4', '#3b82f6', '#6366f1', '#8b5cf6', '#ec4899'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
         }
     });
-
-    // 2. Настройка круговой диаграммы по городам
-    const cityCanvas = document.getElementById('cityChart');
-    new Chart(cityCanvas, {
-        type: 'pie',
-        data: {
-            labels: cityRaw.map(item => item.city),
-            datasets: [{
-                data: cityRaw.map(item => item.total),
-                backgroundColor: [
-                    '#ef4444', '#f97316', '#f59e0b', '#10b981',
-                    '#06b6d4', '#3b82f6', '#6366f1', '#8b5cf6', '#ec4899'
-                ]
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false
-        }
-    });
-</script>
-<script type="text/javascript">
-    (function(m,e,t,r,i,k,a){
-        m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
-        m[i].l=1*new Date();
-        k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)
-    })(window, document, "script", "http://127.0.0.1:8000/", "counter");
-
-    counter({ id: 1 });
 </script>
 </body>
 </html>
