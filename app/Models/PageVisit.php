@@ -13,6 +13,7 @@
             'ip',
             'city',
             'device',
+            'address',
             'screen_resolution',
             'current_url',
         ];

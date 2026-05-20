@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Models\CryptoPrice;
 use App\Services\BinanceService;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Console\Attributes\Description;
 use Illuminate\Console\Attributes\Signature;
 
@@ -20,6 +21,7 @@ class FetchCryptoPrices extends Command
     public function handle() : int
     {
         $this->info('Запуск синхронизации с Binance...');
+        Log::info('Cron: Запуск синхронизации с Binance...');
 
         // Массив пар, которые мы хотим отслеживать
         $targetSymbols = ['BTCUSDT', 'ETHUSDT', 'BNBUSDT'];
@@ -35,9 +37,11 @@ class FetchCryptoPrices extends Command
             }
 
             $this->info('Курсы валют успешно обновлены.');
+            Log::info('Cron: Курсы валют успешно обновлены.');
             return Command::SUCCESS;
         } catch (\Exception $e) {
             $this->error('Произошла ошибка: ' . $e->getMessage());
+            Log::error('Cron Ошибка: ' . $e->getMessage());
             return Command::FAILURE;
         }
     }

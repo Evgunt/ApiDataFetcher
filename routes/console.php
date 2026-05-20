@@ -7,4 +7,6 @@
         $this->comment(Inspiring::quote());
     })->purpose('Display an inspiring quote');
 
-    Schedule::command('crypto:fetch-prices')->everyFiveMinutes();
+    Schedule::command('crypto:fetch-prices')
+        ->everyFiveMinutes()
+        ->appendOutputTo(storage_path('logs/cron.log'));;

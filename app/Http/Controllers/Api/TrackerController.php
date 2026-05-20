@@ -18,22 +18,23 @@
             // 1. Получаем реальный IP-адрес посетителя
             $ip = $request->ip();
             $city = 'Локальный хост';
-
-            // 2. Если это не локальный адрес, запрашиваем город через бесплатное GeoIP API
+            $country = $region = '';
+            // 2. Если это не локальный адрес, запрашиваем город через бесплатное API
             if ($ip !== '127.0.0.1' && $ip !== '::1') {
                 try {
-                    // Делаем быстрый запрос к ip-api (таймаут 3 секунды, чтобы не вешать бэкенд)
-                    $geoResponse = Http::timeout(3)->get("http://ip-api.com{$ip}?lang=ru");
-
-                    if ($geoResponse->successful() && $geoResponse->json('status') === 'success') {
+                    $geoResponse = Http::baseUrl('https://ipapi.co')->get("/{$ip}/json");
+                    if ($geoResponse->successful()) {
                         $city = $geoResponse->json('city') ?? 'Не определен';
+                        $country = $geoResponse->json('country_name');
+                        $region = $geoResponse->json('region');
                     } else {
                         $city = 'Не определен';
                     }
                 } catch (\Exception $e) {
-                    $city = 'Ошибка определения'; // Защита на случай недоступности GeoIP сервиса
+                    $city = 'Ошибка определения'; // Защита на случай недоступности сервиса
                 }
             }
+            $address = implode(', ', array_filter([$country, $region, $city]));
 
             // 3. Валидируем входящие данные от JS-скрипта
             $validated = $request->validate([
@@ -46,6 +47,7 @@
             $visit = PageVisit::create([
                 'ip'                => $ip,
                 'city'              => $city,
+                'address'           => $address,
                 'device'            => $validated['device'],
                 'screen_resolution' => $validated['screen_resolution'],
                 'current_url'       => $validated['current_url'],

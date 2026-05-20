@@ -14,7 +14,8 @@ return new class extends Migration
         Schema::create('page_visits', function (Blueprint $table) {
             $table->id();
             $table->string('ip', 45);             // Поддержка IPv4 и IPv6
-            $table->string('city')->nullable();   // Город (может быть пустым, если не определен)
+            $table->string('city')->nullable();   // Может быть пустым, если не определен
+            $table->string('address')->nullable();
             $table->string('device', 20);         // Desktop, Mobile, Tablet
             $table->string('screen_resolution')->nullable();
             $table->string('current_url')->nullable();
